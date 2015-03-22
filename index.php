@@ -4,11 +4,11 @@
 <title>BTP II</title>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script>
-$(document).ready(function(){
-    $("p").click(function(){
-        $(this).hide();
-    });
-});
+	$(document).ready(function(){
+	    $("p").click(function(){
+	        $(this).hide();
+	    });
+	});
 </script>
 <style type="text/css">
 body{
@@ -46,8 +46,11 @@ body{
 	</div>
 
 <script type="text/javascript">
-function moveSteps(element, steps, direction){
-	// console.log(element);
+function moveSteps(element, steps, direction, cls){
+	$(element).removeClass(cls);
+  	var colNewR = parseInt($(element).data('column'))+parseInt(direction)*parseInt(steps);
+  	var rowR = $(element).data('row');
+  	$('[data-row='+rowR+'][data-column="'+colNewR+'"]').addClass(cls);
 }
 var lbArray = [];
 var rbArray = [];
@@ -65,17 +68,10 @@ $.each(rbArray, function(index, value){
 });
 setInterval(function() {
       $(".leftBound").each(function(index){
-      	$(this).removeClass('leftBound');
-      	var colNewL = parseInt($(this).data('column'))-1;
-      	var rowL = $(this).data('row');
-      	$('[data-row='+rowL+'][data-column="'+colNewL+'"]').addClass('leftBound');
+      	moveSteps(this, 1, -1, 'leftBound');
       });
       $(".rightBound").each(function(index){
-      	moveSteps(this, 1);
-      	$(this).removeClass('rightBound');
-      	var colNewR = parseInt($(this).data('column'))+1;
-      	var rowR = $(this).data('row');
-      	$('[data-row='+rowR+'][data-column="'+colNewR+'"]').addClass('rightBound');
+      	moveSteps(this, 1, 1, 'rightBound');
       });
 }, 1000);
 
