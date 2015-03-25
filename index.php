@@ -39,7 +39,8 @@ body{
 	<?php
 	for($i=0;$i<30;$i++){
 		for($j=0;$j<30;$j++){
-			echo "<div class='divs' data-row='".$i."' data-column='".$j."' id='".$i."-".$j."'></div>";
+			$velocities = array(2,3,4);
+			echo "<div class='divs' data-velocity='".$velocities[array_rand($velocities)]."' data-row='".$i."' data-column='".$j."' id='".$i."-".$j."'></div>";
 		}
 	}
 	?>
@@ -52,6 +53,43 @@ function moveSteps(element, steps, direction, cls){
   	var rowR = $(element).data('row');
   	$('[data-row='+rowR+'][data-column="'+colNewR+'"]').addClass(cls);
 }
+function stepUp(element, cls){
+	$(element).removeClass(cls);
+  	var rowR = parseInt($(element).data('row'))-1;
+  	var colNewR = $(element).data('column');
+  	$('[data-row="'+rowR+'"][data-column="'+colNewR+'"]').addClass(cls);
+}
+function stepDown(element, cls){
+	$(element).removeClass(cls);
+  	var rowR = parseInt($(element).data('row'))+1;
+  	var colNewR = $(element).data('column');
+  	$('[data-row="'+rowR+'"][data-column="'+colNewR+'"]').addClass(cls);
+}
+function checkDown(element, cls){
+	var rowR = parseInt($(element).data('row'))+1;
+	if(rowR>29){
+		return true;
+	}
+  	var colNewR = $(element).data('column');
+	if($('.'+cls+'[data-row="'+rowR+'"][data-column="'+colNewR+'"]').length>0){
+  		return true
+  	}else{
+  		return false;
+  	}
+}
+function checkTop(element, cls){
+	var rowR = parseInt($(element).data('row'))-1;
+	if(rowR<0){
+		return true;
+	}
+  	var colNewR = $(element).data('column');
+  	if($('.'+cls+'[data-row="'+rowR+'"][data-column="'+colNewR+'"]').length>0){
+  		return true
+  	}else{
+  		return false;
+  	}
+	// return .hasClass(cls);
+}
 function same_dir_same_lane_dist(element, cls){
 	var row = $(element).data('row');
 	var column = $(element).data('column');
@@ -61,12 +99,16 @@ function same_dir_same_lane_dist(element, cls){
 		var col = $(this).data('column');
 		same_dir_walkers.push(col);
 	});
-	console.log(same_dir_walkers);
+	// console.log(same_dir_walkers);
 	$.each(same_dir_walkers, function(index, value){
-		var val = parseInt(value) - 29;
-		dist.push(val);
+		var val = parseInt(value) - parseInt(column);
+		if(cls=='leftBound'&&parseInt(val)<0){
+			dist.push(Math.abs(val));	
+		}else if(cls=='rightBound'&&parseInt(val>0)){
+			dist.push(val);	
+		}
 	});
-	console.log(dist);
+	return Math.min.apply(null, dist);
 }
 function opp_dir_same_lane_dist(element, cls, ocls){
 	var row = $(element).data('row');
@@ -77,24 +119,101 @@ function opp_dir_same_lane_dist(element, cls, ocls){
 		var col = $(this).data('column');
 		opp_dir_walkers.push(col);
 	});
-	console.log(opp_dir_walkers);
+	// console.log(opp_dir_walkers);
 	$.each(opp_dir_walkers, function(index, value){
-		var val = parseInt(value) - 29;
-		dist.push(val);
+		var val = parseInt(value) - parseInt(column);
+		if(cls=='leftBound'&&parseInt(val)<0){
+			dist.push(Math.abs(val));	
+		}else if(cls=='rightBound'&&parseInt(val>0)){
+			dist.push(val);	
+		}
 	});
-	console.log(dist);
+	return Math.min.apply(Math, dist);
+	// console.log("ODSL: "+dist);
 }
 function same_dir_top_lane_dist(element, cls){
-	console.log("3 success");
+	var row = parseInt($(element).data('row'))-1;
+	var column = $(element).data('column');
+	var same_dir_walkers = [];
+	var dist = [];
+	$('.'+cls+'[data-row='+row+']').each(function(){
+		var col = $(this).data('column');
+		same_dir_walkers.push(col);
+	});
+	// console.log(same_dir_walkers);
+	$.each(same_dir_walkers, function(index, value){
+		var val = parseInt(value) - parseInt(column);
+		if(cls=='leftBound'&&parseInt(val)<0){
+			dist.push(Math.abs(val));	
+		}else if(cls=='rightBound'&&parseInt(val>0)){
+			dist.push(val);	
+		}
+	});
+	return Math.min.apply(Math, dist);
+	// console.log("SDTL: "+dist);
 }
 function opp_dir_top_lane_dist(element, cls, ocls){
-	console.log("4 success");
+	var row = parseInt($(element).data('row'))-1;
+	var column = $(element).data('column');
+	var opp_dir_walkers = [];
+	var dist = [];
+	$('.'+ocls+'[data-row='+row+']').each(function(){
+		var col = $(this).data('column');
+		opp_dir_walkers.push(col);
+	});
+	// console.log(opp_dir_walkers);
+	$.each(opp_dir_walkers, function(index, value){
+		var val = parseInt(value) - parseInt(column);
+		if(cls=='leftBound'&&parseInt(val)<0){
+			dist.push(Math.abs(val));	
+		}else if(cls=='rightBound'&&parseInt(val>0)){
+			dist.push(val);	
+		}
+	});
+	return Math.min.apply(Math, dist);
+	// console.log("ODTL: "+dist);
 }
 function same_dir_bottom_lane_dist(element, cls){
-	console.log("5 success");
+	var row = parseInt($(element).data('row'))+1;
+	var column = $(element).data('column');
+	var same_dir_walkers = [];
+	var dist = [];
+	$('.'+cls+'[data-row='+row+']').each(function(){
+		var col = $(this).data('column');
+		same_dir_walkers.push(col);
+	});
+	// console.log(same_dir_walkers);
+	$.each(same_dir_walkers, function(index, value){
+		var val = parseInt(value) - parseInt(column);
+		if(cls=='leftBound'&&parseInt(val)<0){
+			dist.push(Math.abs(val));	
+		}else if(cls=='rightBound'&&parseInt(val>0)){
+			dist.push(val);	
+		}
+	});
+	return Math.min.apply(Math, dist);
+	// console.log("SDBL: "+dist);
 }
 function opp_dir_bottom_lane_dist(element, cls, ocls){
-	console.log("6 success");
+	var row = parseInt($(element).data('row'))+1;
+	var column = $(element).data('column');
+	var opp_dir_walkers = [];
+	var dist = [];
+	$('.'+ocls+'[data-row='+row+']').each(function(){
+		var col = $(this).data('column');
+		opp_dir_walkers.push(col);
+	});
+	// console.log(opp_dir_walkers);
+	$.each(opp_dir_walkers, function(index, value){
+		var val = parseInt(value) - parseInt(column);
+		if(cls=='leftBound'&&parseInt(val)<0){
+			dist.push(Math.abs(val));	
+		}else if(cls=='rightBound'&&parseInt(val>0)){
+			dist.push(val);	
+		}
+	});
+	return Math.min.apply(Math, dist);
+	// console.log("ODBL: "+dist);
 }
 var lbArray = [];
 var rbArray = [];
@@ -114,11 +233,25 @@ setTimeout(function() {
       $(".leftBound").each(function(index){
       	var sdsl = same_dir_same_lane_dist(this, 'leftBound');
       	var odsl = opp_dir_same_lane_dist(this, 'leftBound', 'rightBound');
-      	// var sdtl = same_dir_top_lane_dist(this, 'leftBound');
-      	// var odtl = opp_dir_top_lane_dist(this, 'leftBound', 'rightBound');
-      	// var sdbl = same_dir_bottom_lane_dist(this, 'leftBound');
-      	// var odbl = opp_dir_bottom_lane_dist(this, 'leftBound', 'rightBound');
-      	moveSteps(this, 1, -1, 'leftBound');
+      	var sdtl = same_dir_top_lane_dist(this, 'leftBound');
+      	var odtl = opp_dir_top_lane_dist(this, 'leftBound', 'rightBound');
+      	var sdbl = same_dir_bottom_lane_dist(this, 'leftBound');
+      	var odbl = opp_dir_bottom_lane_dist(this, 'leftBound', 'rightBound');
+
+      	// console.log(sdsl);
+      	// console.log(odsl);
+      	// console.log(sdtl);
+      	// console.log(odtl);
+      	// console.log(sdbl);
+      	// console.log(odbl);
+      	// moveSteps(this, 1, -1, 'leftBound');
+      	if(checkDown(this, 'leftBound')==false){
+      		stepDown(this, 'leftBound');	
+      	}
+      	// if(checkTop(this, 'leftBound')==false){
+      	// 	stepUp(this, 'leftBound');	
+      	// }
+      	// stepUp(this, 'leftBound');
       });
       $(".rightBound").each(function(index){
       	// var sdsl = same_dir_same_lane_dist(this, 'rightBound');
