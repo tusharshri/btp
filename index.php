@@ -215,6 +215,24 @@ function opp_dir_bottom_lane_dist(element, cls, ocls){
 	return Math.min.apply(Math, dist);
 	// console.log("ODBL: "+dist);
 }
+// gap computation subprocedure starts
+function computeGap(sdsl, odsl, v_max, cls){
+	var gap_same = 0;
+	var gap_opp = 0;
+	if(sdsl<=8){
+		gap_same = sdsl;
+	}else{
+		gap_same = 8
+	}
+	if(odsl<=8){
+		gap_opp = parseInt(0.5*odsl);
+	}else{
+		gap_opp = 4;
+	}
+	var gap = Math.min(gap_same, gap_opp, v_max);
+	return gap;
+}
+// gap computation subprocedure ends
 var lbArray = [];
 var rbArray = [];
 for(var i=0;i<20;i++){
@@ -237,7 +255,9 @@ setTimeout(function() {
       	var odtl = opp_dir_top_lane_dist(this, 'leftBound', 'rightBound');
       	var sdbl = same_dir_bottom_lane_dist(this, 'leftBound');
       	var odbl = opp_dir_bottom_lane_dist(this, 'leftBound', 'rightBound');
-
+      	var v_max = $(this).data('velocity');
+      	var gap = parseInt(computeGap(sdsl, odsl, v_max, 'leftBound'));
+      	moveSteps(this, gap, -1, 'leftBound');
       	// console.log(sdsl);
       	// console.log(odsl);
       	// console.log(sdtl);
@@ -245,9 +265,9 @@ setTimeout(function() {
       	// console.log(sdbl);
       	// console.log(odbl);
       	// moveSteps(this, 1, -1, 'leftBound');
-      	if(checkDown(this, 'leftBound')==false){
-      		stepDown(this, 'leftBound');	
-      	}
+      	// if(checkDown(this, 'leftBound')==false){
+      	// 	stepDown(this, 'leftBound');	
+      	// }
       	// if(checkTop(this, 'leftBound')==false){
       	// 	stepUp(this, 'leftBound');	
       	// }
