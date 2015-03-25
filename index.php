@@ -108,7 +108,7 @@ function same_dir_same_lane_dist(element, cls){
 			dist.push(val);	
 		}
 	});
-	return Math.min.apply(null, dist);
+	return Math.min.apply(Math, dist);
 }
 function opp_dir_same_lane_dist(element, cls, ocls){
 	var row = $(element).data('row');
