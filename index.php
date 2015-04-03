@@ -119,12 +119,11 @@ function opp_dir_same_lane_dist(element, cls, ocls){
 		var col = $(this).data('column');
 		opp_dir_walkers.push(col);
 	});
-	// console.log(opp_dir_walkers);
 	$.each(opp_dir_walkers, function(index, value){
 		var val = parseInt(value) - parseInt(column);
 		if(cls=='leftBound'&&parseInt(val)<0){
 			dist.push(Math.abs(val));	
-		}else if(cls=='rightBound'&&parseInt(val>0)){
+		}else if(cls=='rightBound'&&parseInt(val)>0){
 			dist.push(val);	
 		}
 	});
@@ -166,7 +165,7 @@ function opp_dir_top_lane_dist(element, cls, ocls){
 		var val = parseInt(value) - parseInt(column);
 		if(cls=='leftBound'&&parseInt(val)<0){
 			dist.push(Math.abs(val));	
-		}else if(cls=='rightBound'&&parseInt(val>0)){
+		}else if(cls=='rightBound'&&parseInt(val)>0){
 			dist.push(val);	
 		}
 	});
@@ -208,7 +207,7 @@ function opp_dir_bottom_lane_dist(element, cls, ocls){
 		var val = parseInt(value) - parseInt(column);
 		if(cls=='leftBound'&&parseInt(val)<0){
 			dist.push(Math.abs(val));	
-		}else if(cls=='rightBound'&&parseInt(val>0)){
+		}else if(cls=='rightBound'&&parseInt(val)>0){
 			dist.push(val);	
 		}
 	});
@@ -235,10 +234,10 @@ function computeGap(sdsl, odsl, v_max, cls){
 // gap computation subprocedure ends
 var lbArray = [];
 var rbArray = [];
-for(var i=0;i<20;i++){
+for(var i=0;i<10;i++){
 	lbArray.push(Math.floor(Math.random()*30));
 }
-for(var i=0;i<20;i++){
+for(var i=0;i<10;i++){
 	rbArray.push(Math.floor(Math.random()*30));
 }
 $.each(lbArray, function(index, value){
@@ -247,7 +246,7 @@ $.each(lbArray, function(index, value){
 $.each(rbArray, function(index, value){
 	$('[data-row='+value+'][data-column="0"]').addClass('rightBound');
 });
-setTimeout(function() {
+setInterval(function() {
       $(".leftBound").each(function(index){
       	var sdsl = same_dir_same_lane_dist(this, 'leftBound');
       	var odsl = opp_dir_same_lane_dist(this, 'leftBound', 'rightBound');
@@ -257,7 +256,29 @@ setTimeout(function() {
       	var odbl = opp_dir_bottom_lane_dist(this, 'leftBound', 'rightBound');
       	var v_max = $(this).data('velocity');
       	var gap = parseInt(computeGap(sdsl, odsl, v_max, 'leftBound'));
-      	moveSteps(this, gap, -1, 'leftBound');
+      	if(gap>0){
+      		moveSteps(this, gap, -1, 'leftBound');	
+      	}else{
+      		if($(this).data('row')=="0"){
+      			if(checkDown(this, 'leftBound')==false){
+		      		stepDown(this, 'leftBound');	
+		      	}
+      		}else if($(this).data('row')=="29"){
+      			if(checkTop(this, 'leftBound')==false){
+		      		stepUp(this, 'leftBound');	
+		      	}
+      		}else{
+      			if(checkDown(this, 'leftBound')==false){
+		      		stepDown(this, 'leftBound');	
+		      	}else{
+	      			if(checkTop(this, 'leftBound')==false){
+			      		stepUp(this, 'leftBound');	
+			      	}
+	      		}
+      		}
+      		
+      	}
+      	
       	// console.log(sdsl);
       	// console.log(odsl);
       	// console.log(sdtl);
@@ -274,14 +295,52 @@ setTimeout(function() {
       	// stepUp(this, 'leftBound');
       });
       $(".rightBound").each(function(index){
-      	// var sdsl = same_dir_same_lane_dist(this, 'rightBound');
-      	// var odsl = opp_dir_same_lane_dist(this, 'rightBound', 'leftBound');
-      	// var sdtl = same_dir_top_lane_dist(this, 'rightBound');
-      	// var odtl = opp_dir_top_lane_dist(this, 'rightBound', 'leftBound');
-      	// var sdbl = same_dir_bottom_lane_dist(this, 'rightBound');
-      	// var odbl = opp_dir_bottom_lane_dist(this, 'rightBound', 'leftBound');
-      	// moveSteps(this, 1, 1, 'rightBound');
+      	var sdsl = same_dir_same_lane_dist(this, 'rightBound');
+      	var odsl = opp_dir_same_lane_dist(this, 'rightBound', 'leftBound');
+      	var sdtl = same_dir_top_lane_dist(this, 'rightBound');
+      	var odtl = opp_dir_top_lane_dist(this, 'rightBound', 'leftBound');
+      	var sdbl = same_dir_bottom_lane_dist(this, 'rightBound');
+      	var odbl = opp_dir_bottom_lane_dist(this, 'rightBound', 'leftBound');
+      	var v_max = $(this).data('velocity');
+      	var gap = parseInt(computeGap(sdsl, odsl, v_max, 'rightBound'));
+      	if(gap>0){
+      		moveSteps(this, gap, 1, 'rightBound');	
+      	}else{
+      		if($(this).data('row')=="0"){
+      			if(checkDown(this, 'rightBound')==false){
+		      		stepDown(this, 'rightBound');	
+		      	}
+      		}else if($(this).data('row')=="29"){
+      			if(checkTop(this, 'rightBound')==false){
+		      		stepUp(this, 'rightBound');	
+		      	}
+      		}else{
+      			if(checkDown(this, 'rightBound')==false){
+		      		stepDown(this, 'rightBound');	
+		      	}else{
+	      			if(checkTop(this, 'rightBound')==false){
+			      		stepUp(this, 'rightBound');	
+			      	}
+	      		}
+      		}
+      		
+      	}
+
       });
+		var lbArray = [];
+	  	for(var i=0;i<10;i++){
+			lbArray.push(Math.floor(Math.random()*30));
+		}
+		$.each(lbArray, function(index, value){
+			$('[data-row='+value+'][data-column="29"]').addClass('leftBound');
+		});
+		var rbArray = [];
+		for(var i=0;i<10;i++){
+			rbArray.push(Math.floor(Math.random()*30));
+		}
+		$.each(rbArray, function(index, value){
+			$('[data-row='+value+'][data-column="0"]').addClass('rightBound');
+		});
 }, 1000);
 
 </script>
