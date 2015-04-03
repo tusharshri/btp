@@ -3,13 +3,6 @@
 <head>
 <title>BTP II</title>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script>
-	$(document).ready(function(){
-	    $("p").click(function(){
-	        $(this).hide();
-	    });
-	});
-</script>
 <style type="text/css">
 body{
 	margin: 10px;
