@@ -11,12 +11,12 @@ body{
 	font-family: 'Open Sans', sans-serif;
 }
 .mainContainer{
-	width: 2700px;
-	height: 270px;
+	width: 1620px;
+	height: 810px;
 	margin: 0 auto;
 }
 .dataContainer{
-	width: 2700px;
+	width: 1620px;
 	margin: 0 auto;
 }
 .divs{
@@ -40,7 +40,7 @@ body{
 }
 .headContainer{
 	margin-bottom: 5px;
-	width: 2700px;
+	width: 1620px;
 	margin: 0 auto;
 	text-align: center;
 	font-size: 24px;
@@ -77,8 +77,8 @@ body{
 	</div>
 	<div class="mainContainer">
 	<?php
-	for($i=0;$i<10;$i++){
-		for($j=0;$j<100;$j++){
+	for($i=0;$i<30;$i++){
+		for($j=0;$j<60;$j++){
 			$velocities = array(2,3,4);
 			echo "<div class='divs' data-velocity='".$velocities[array_rand($velocities)]."' data-row='".$i."' data-column='".$j."' id='".$i."-".$j."'></div>";
 		}
@@ -155,7 +155,7 @@ $('#startSim').on('click', function(){
 	function checkDown(element, cls){
 		var ocls = get_ocls(cls);
 		var rowR = parseInt($(element).data('row'))+1;
-		if(rowR>9){
+		if(rowR>29){
 			return true;
 		}
 	  	var colNewR = $(element).data('column');
@@ -318,7 +318,7 @@ $('#startSim').on('click', function(){
 		var gap_same = 0;
 		var gap_opp = 0;
 		if(sdsl<=8){
-			gap_same = sdsl-1;
+			gap_same = sdsl;
 		}else{
 			gap_same = 8
 		}
@@ -333,93 +333,28 @@ $('#startSim').on('click', function(){
 	// gap computation subprocedure ends
 	var lbArray = [];
 	var rbArray = [];
-	for(var i=0;i<3;i++){
-		lbArray.push(Math.floor(Math.random()*10));
+	for(var i=0;i<20;i++){
+		lbArray.push(Math.floor(Math.random()*60));
 	}
-	console.log(lbArray);
-	for(var i=0;i<3;i++){
-		rbArray.push(Math.floor(Math.random()*10));
+	for(var i=0;i<20;i++){
+		rbArray.push(Math.floor(Math.random()*60));
 	}
-	console.log(rbArray);
 	$.each(lbArray, function(index, value){
-		$('[data-row='+value+'][data-column="99"]').addClass('leftBound');
+		$('[data-row='+value+'][data-column="59"]').addClass('leftBound');
 	});
 	$.each(rbArray, function(index, value){
 		$('[data-row='+value+'][data-column="0"]').addClass('rightBound');
 	});
-	function findSameDirLane(row, sdsl, odsl, sdtl, odtl, sdbl, odbl){
-		if(odtl=='Infinity'&&row!=0){
+	function findSameDirLane(sdsl, odsl, sdtl, odtl, sdbl, odbl){
+		if(odtl=='Infinity'||odtl>8){
 			return "top";
-		}else if(odbl=='Infinity'&&row!=9){
-			return "bottom";
-		}else if(odbl>=8&&odtl>=8){
-			if(sdtl>sdbl&&row!=0){
-				return "top";
-			}else if(sdbl>sdtl&&row!=9){
-				return "bottom";
-			}else if(odbl>odtl&&row!=9){
-				return "bottom";
-			}else if(odtl>odbl&&row!=0){
-				return "top";
-			}else{
-				return "any";
-			}
-		}else if(odtl>=8&&odbl<8&&row!=0){
-			return "top";
-		}else if(odbl>=8&&odtl<8&&row!=9){
+		}else if(odbl=='Infinity'||odbl>8){
 			return "bottom";
 		}else{
 			return "any";
 		}
 	}
-	function checkFirstODinRow(ocls, k){
-		var row = parseInt(k);
-		var column = 0;
-		var cls="";
-		if(ocls=='rightBound'){
-			column = 99;
-			cls="leftBound";
-		}else if(ocls=='leftBound'){
-			column = 0;
-			cls="rightBound";
-		}
-		var opp_dir_walkers = [];
-		var dist = [];
-		$('.'+ocls+'[data-row='+row+']').each(function(){
-			var col = $(this).data('column');
-			opp_dir_walkers.push(col);
-		});
-		$.each(opp_dir_walkers, function(index, value){
-			var val = parseInt(value) - parseInt(column);
-			if(cls=='leftBound'&&parseInt(val)<0){
-				dist.push(Math.abs(val));	
-			}else if(cls=='rightBound'&&parseInt(val)>0){
-				dist.push(val);	
-			}
-		});
-		return Math.min.apply(Math, dist);
-	}
-	function checkAvailableLanes(cls){
-		var ocls = get_ocls(cls);
-		var allowedLanes = [];
-		for(var k=0;k<10;k++){
-  			if(checkFirstODinRow(ocls, k)<10){
-  				continue;
-  			}else{
-  				allowedLanes.push(k);
-  			}	
-		}
-		return allowedLanes;
-	}
-	function shuffle(o){
-	    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-	    return o;
-	};
-	var simulationStep = 0;
 	function simulate(){
-		var speed = 0;
-		var sidestepVal = 0;
-		simulationStep++;
 		$(".leftBound").each(function(index){
 	      	var sdsl = same_dir_same_lane_dist(this, 'leftBound');
 	      	var odsl = opp_dir_same_lane_dist(this, 'leftBound', 'rightBound');
@@ -428,85 +363,53 @@ $('#startSim').on('click', function(){
 	      	var sdbl = same_dir_bottom_lane_dist(this, 'leftBound');
 	      	var odbl = opp_dir_bottom_lane_dist(this, 'leftBound', 'rightBound');
 	      	var v_max = $(this).data('velocity');
-	      	var elRow = parseInt($(this).data('row'));
 	      	var gap = parseInt(computeGap(sdsl, odsl, v_max, 'leftBound'));
 	      	if(gap>0){
 	      		if(odsl<8){
-	      			var sameDirectionLane = findSameDirLane(elRow, sdsl, odsl, sdtl, odtl, sdbl, odbl);
+	      			var sameDirectionLane = findSameDirLane(sdsl, odsl, sdtl, odtl, sdbl, odbl);
 	      			if(sameDirectionLane=="bottom"){
 	      				if(checkDown(this, 'leftBound')==false){
 	      					stepDown(this, 'leftBound');
-	      					sidestepVal++;
 	      				}else{
 			      			moveSteps(this, gap, -1, 'leftBound');
-			      			speed = speed + parseInt(gap);
 			      		}
 	      			}else if(sameDirectionLane=="top"){
 	      				if(checkTop(this, 'leftBound')==false){
 	      					stepUp(this, 'leftBound');
-	      					sidestepVal++;
 	      				}else{
 			      			moveSteps(this, gap, -1, 'leftBound');
-			      			speed = speed + parseInt(gap);
 			      		}
 	      			}else{
-	      				if(odtl>odsl&&elRow!=0){
-	      					if(checkTop(this, 'leftBound')==false){
-		      					stepUp(this, 'leftBound');
-		      					sidestepVal++;
-		      				}else{
-		      					moveSteps(this, gap, -1, 'leftBound');
-		      					speed = speed + parseInt(gap);
-		      				}
-	      				}else if(odbl>odsl&&elRow!=9){
-	      					if(checkDown(this, 'leftBound')==false){
-		      					stepDown(this, 'leftBound');
-		      					sidestepVal++;
-		      				}else{
-		      					moveSteps(this, gap, -1, 'leftBound');
-		      					speed = speed + parseInt(gap);
-		      				}
-	      				}else{
-	      					moveSteps(this, gap, -1, 'leftBound');
-	      					speed = speed + parseInt(gap);
-	      				}
+		      			moveSteps(this, gap, -1, 'leftBound');
 		      		}
 	      		}else{
 	      			moveSteps(this, gap, -1, 'leftBound');
-	      			speed = speed + parseInt(gap);
 	      		}
 	      	}else{
 	      		if($(this).data('row')=="0"){
 	      			if(checkDown(this, 'leftBound')==false){
-			      		stepDown(this, 'leftBound');
-			      		sidestepVal++;	
+			      		stepDown(this, 'leftBound');	
 			      	}
-	      		}else if($(this).data('row')=="9"){
+	      		}else if($(this).data('row')=="29"){
 	      			if(checkTop(this, 'leftBound')==false){
-			      		stepUp(this, 'leftBound');
-			      		sidestepVal++;
+			      		stepUp(this, 'leftBound');	
 			      	}
 	      		}else{
 	      			if(checkDown(this, 'leftBound')==false&&checkTop(this,'leftBound')==false){
 	      				var movementFavoured = checkAllowedMovement(this, 'leftBound', sdtl, odtl, sdbl, odbl);
 	      				if(movementFavoured=='bottom'){
 	      					stepDown(this, 'leftBound');
-	      					sidestepVal++;
 	      				}else if(movementFavoured=='top'){
 	      					stepUp(this, 'leftBound');
-	      					sidestepVal++;
 	      				}else if(movementFavoured=='any'){
 	      					stepDown(this, 'leftBound');
-	      					sidestepVal++;
 	      				}
 	      			}else{
 	      				if(checkDown(this, 'leftBound')==false){
-				      		stepDown(this, 'leftBound');
-				      		sidestepVal++;	
+				      		stepDown(this, 'leftBound');	
 				      	}else{
 			      			if(checkTop(this, 'leftBound')==false){
-					      		stepUp(this, 'leftBound');
-					      		sidestepVal++;
+					      		stepUp(this, 'leftBound');	
 					      	}
 			      		}
 	      			}      			
@@ -523,84 +426,52 @@ $('#startSim').on('click', function(){
 	      	var odbl = opp_dir_bottom_lane_dist(this, 'rightBound', 'leftBound');
 	      	var v_max = $(this).data('velocity');
 	      	var gap = parseInt(computeGap(sdsl, odsl, v_max, 'rightBound'));
-	      	var elRow = parseInt($(this).data('row'));
 	      	if(gap>0){
 	      		if(odsl<8){
-	      			var sameDirectionLane = findSameDirLane(elRow, sdsl, odsl, sdtl, odtl, sdbl, odbl);
+	      			var sameDirectionLane = findSameDirLane(sdsl, odsl, sdtl, odtl, sdbl, odbl);
 	      			if(sameDirectionLane=="top"){
 	      				if(checkTop(this, 'rightBound')==false){
 	      					stepUp(this, 'rightBound');
-	      					sidestepVal++;
 	      				}else{
 			      			moveSteps(this, gap, 1, 'rightBound');
-			      			speed = speed + parseInt(gap);
 			      		}
 	      			}else if(sameDirectionLane=="bottom"){
 	      				if(checkDown(this, 'rightBound')==false){
 	      					stepDown(this, 'rightBound');
-	      					sidestepVal++;
 	      				}else{
 			      			moveSteps(this, gap, 1, 'rightBound');
-			      			speed = speed + parseInt(gap);
 			      		}
 	      			}else{
-		      			if(odtl>odsl&&elRow!=0){
-	      					if(checkTop(this, 'rightBound')==false){
-		      					stepUp(this, 'rightBound');
-		      					sidestepVal++;
-		      				}else{
-		      					moveSteps(this, gap, 1, 'rightBound');
-		      					speed = speed + parseInt(gap);
-		      				}
-	      				}else if(odbl>odsl&&elRow!=9){
-	      					if(checkDown(this, 'rightBound')==false){
-		      					stepDown(this, 'rightBound');
-		      					sidestepVal++;
-		      				}else{
-		      					moveSteps(this, gap, 1, 'rightBound');
-		      					speed = speed + parseInt(gap);
-		      				}
-	      				}else{
-	      					moveSteps(this, gap, 1, 'rightBound');
-	      					speed = speed + parseInt(gap);
-	      				}
+		      			moveSteps(this, gap, 1, 'rightBound');
 		      		}
 	      		}else{
 	      			moveSteps(this, gap, 1, 'rightBound');
-	      			speed = speed + parseInt(gap);
 	      		}
 	      	}else{
 	      		if($(this).data('row')=="0"){
 	      			if(checkDown(this, 'rightBound')==false){
-			      		stepDown(this, 'rightBound');
-			      		sidestepVal++;
+			      		stepDown(this, 'rightBound');	
 			      	}
-	      		}else if($(this).data('row')=="9"){
+	      		}else if($(this).data('row')=="29"){
 	      			if(checkTop(this, 'rightBound')==false){
-			      		stepUp(this, 'rightBound');
-			      		sidestepVal++;
+			      		stepUp(this, 'rightBound');	
 			      	}
 	      		}else{
 	      			if(checkDown(this, 'rightBound')==false&&checkTop(this,'rightBound')==false){
 	      				var movementFavoured = checkAllowedMovement(this, 'rightBound', sdtl, odtl, sdbl, odbl);
 	      				if(movementFavoured=='top'){
 	      					stepUp(this, 'rightBound');
-	      					sidestepVal++;
 	      				}else if(movementFavoured=='bottom'){
 	      					stepDown(this, 'rightBound');
-	      					sidestepVal++;
 	      				}else if(movementFavoured=='any'){
 	      					stepUp(this, 'rightBound');
-	      					sidestepVal++;
 	      				}
 	      			}else{
 	      				if(checkTop(this, 'rightBound')==false){
-				      		stepUp(this, 'rightBound');
-				      		sidestepVal++;	
+				      		stepDown(this, 'rightBound');	
 				      	}else{
 			      			if(checkDown(this, 'rightBound')==false){
-					      		stepDown(this, 'rightBound');
-					      		sidestepVal++;
+					      		stepUp(this, 'rightBound');	
 					      	}
 			      		}
 	      			}      			
@@ -609,37 +480,17 @@ $('#startSim').on('click', function(){
 	      	}
 
 	      });
-			var lanesAvailableLB = checkAvailableLanes('leftBound');
-			var lanesAvailableRB = checkAvailableLanes('rightBound');
-			lanesAvailableLBS = shuffle(lanesAvailableLB);
-			lanesAvailableRBS = shuffle(lanesAvailableRB);
-			var countL = 0;
-			var countR = 0;
 			var lbArray = [];
-			var rbArray = [];
-			var pedCount = parseInt(parseInt(simulationStep)/50)+1;
-			var pedPiv = [pedCount];
-			$.each(lanesAvailableLBS, function(index, value){
-				var pedPivL = pedPiv[Math.floor(Math.random() * pedPiv.length)];
-				if(countL>=pedPivL){
-					return false;
-				}else{
-					lbArray.push(value);
-					countL++;
-				}
-			});
-			$.each(lanesAvailableRBS, function(index, value){
-				var pedPivR = pedPiv[Math.floor(Math.random() * pedPiv.length)];
-				if(countR>=pedPivR){
-					return false;
-				}else{
-					rbArray.push(value);
-					countR++;
-				}
-			});
+		  	for(var i=0;i<20;i++){
+				lbArray.push(Math.floor(Math.random()*60));
+			}
 			$.each(lbArray, function(index, value){
-				$('[data-row='+value+'][data-column="99"]').addClass('leftBound');
+				$('[data-row='+value+'][data-column="59"]').addClass('leftBound');
 			});
+			var rbArray = [];
+			for(var i=0;i<20;i++){
+				rbArray.push(Math.floor(Math.random()*60));
+			}
 			$.each(rbArray, function(index, value){
 				$('[data-row='+value+'][data-column="0"]').addClass('rightBound');
 			});
@@ -649,23 +500,6 @@ $('#startSim').on('click', function(){
 			$('#totalLeftBound').val(totalLeftBound);
 			$('#totalRightBound').val(totalRightBound);
 			$('#totalPed').val(totalPed);
-			var density = parseInt(totalPed);
-			var sidestep = sidestepVal;
-			var totalPed = parseInt(totalPed);
-			var speed = speed;
-			if(simulationStep>30){
-				$.ajax({
-					type: "POST",
-					url: "enterInDB.php",
-					dataType: "html",
-					data: {density: density, sidestep: sidestep, speed:speed, totalPed: totalPed, simulationStep: simulationStep},
-					success: function(data){
-						console.log('data entered in db');
-					}
-
-				});
-			}
-			
 	}
 	var timer = setInterval(simulate, 2000);
 });
@@ -677,6 +511,8 @@ $('body').keyup(function(e){
 	   	}
 	}
 });
+
+
 </script>
 </body>
 </html>
